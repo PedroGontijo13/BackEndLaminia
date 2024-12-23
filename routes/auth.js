@@ -2,8 +2,10 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-const router = express.Router(); // Explicitly type the router
-// Register route
+import { authenticate } from '../middleware/auth.js';
+const router = express.Router();
+import Post from '../models/Post.js';
+
 router.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
@@ -27,7 +29,7 @@ router.post('/register', async (req, res) => {
         res.status(500).json({ message: 'Erro ao registrar usuário.', error });
     }
 });
-// Login route
+
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -54,4 +56,40 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ message: 'Erro ao realizar login.', error });
     }
 });
+
+router.get('/posts', async (req, res) => {
+    try {
+        const posts = await Post.find().populate('userId', 'username email');
+        res.status(200).json(posts);
+    } catch (error) {
+        console.error('Erro ao buscar posts:', error);
+        res.status(500).json({ message: 'Erro ao buscar posts.', error });
+    }
+});
+
+router.post('/posts', authenticate, async (req, res) => {
+    const { title, content } = req.body;
+
+    if (!title || !content) {
+        return res.status(400).json({ message: 'All fields are required.' });
+    }
+
+    try {
+        const newPost = new Post({
+            title,
+            content,
+            userId: req.user.id, 
+        });
+
+        const savedPost = await newPost.save();
+        res.status(201).json({
+            message: 'Post created successfully!',
+            post: savedPost,
+        });
+    } catch (error) {
+        console.error('Error creating post:', error);
+        res.status(500).json({ message: 'Error creating post.', error });
+    }
+});
+
 export default router;
