@@ -12,15 +12,19 @@ app.use(
         origin: (origin, callback) => {
             if (!origin || allowedOrigins.includes(origin)) {
                 callback(null, true);
-                console.log(`CORS request from origin: ${origin}`)
+                console.log(`CORS request allowed from origin: ${origin}`);
             } else {
+                console.error(`CORS request blocked from origin: ${origin}`);
                 callback(new Error('Not allowed by CORS'));
             }
         },
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true,
     })
 );
+
+app.options('*', cors());
 
 app.use(express.json());
 
