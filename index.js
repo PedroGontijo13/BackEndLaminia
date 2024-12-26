@@ -5,7 +5,7 @@ import authRoutes from './routes/auth.js';
 
 const app = express();
 
-const allowedOrigins = ['https://nextjsfullstack-wheat.vercel.app', 'https://nextjsfullstack-wheat.vercel.app'];
+const allowedOrigins = ['https://nextjsfullstack-wheat.vercel.app'];
 
 app.use(
     cors({
